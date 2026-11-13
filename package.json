@@ -4,14 +4,15 @@
   "version": "0.1.0",
   "license": "MIT",
   "type": "module",
+  "engines": { "node": "22.x" },
   "scripts": {
-    "dev": "bun run wasm && vite --host 127.0.0.1",
-    "build": "bun run wasm && tsc --noEmit && vite build",
+    "dev": "node scripts/ensure-wasm.mjs --build && vite --host 127.0.0.1",
+    "build": "node scripts/ensure-wasm.mjs && tsc --noEmit && vite build",
     "preview": "vite preview --host 127.0.0.1",
     "test": "bun run wasm && cargo test --workspace && bun test tests",
     "typecheck": "tsc --noEmit",
     "lint:layout": "bun run wasm && bun tools/layout-lint.ts",
-    "wasm": "cargo build -p chimera-wasm --release --target wasm32-unknown-unknown && cp target/wasm32-unknown-unknown/release/chimera_wasm.wasm src/wasm/chimera.wasm"
+    "wasm": "node scripts/ensure-wasm.mjs --build"
   },
   "dependencies": {
     "react": "19.3.1",

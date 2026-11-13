@@ -35,6 +35,9 @@ for tests and the `chimera` CLI.
 - **Beatbox**: pads and a step sequencer, every drum an articulatory gesture.
 - **Bestiary**: songbird (two-voice syrinx), seal, alligator and elephant.
 - **Duet** (`?show=<id>`): two 3D heads replay a pre-rendered song.
+- **Choir 95** (`/choir95`, linked from the top bar): a Windows 95 choir keyboard. One key
+  sings a chord on several copies of this voice. Choir 95 demo built on Chimera by jamesondh (MIT).
+  The window chrome is hand-written CSS in the style of [98.css](https://github.com/jdan/98.css) (MIT, Jordan Scales); no Microsoft fonts or logo artwork are included.
 
 Male, female and child bodies blend continuously. Everything on screen animates from live
 engine state: pressure in the airway, airflow, the vocal folds, spectra and formants.
@@ -51,6 +54,11 @@ bun run test       # wasm build, cargo test --workspace, bun test tests
 
 The AudioWorklet needs a secure context, so open it on localhost or over HTTPS (for example
 `tailscale serve`). Vercel builds it with `vercel.json`.
+
+The hosted build does not compile Rust. `vercel.json` sets `CHIMERA_PREBUILT=1`, and
+`bun run build` then copies the committed `vendor/chimera.wasm` (a release build of this
+engine). Refresh that file, when the engine itself changes, with
+`node scripts/ensure-wasm.mjs --build --vendor`. A local `bun run dev` still compiles.
 
 Offline renders and measurement:
 
