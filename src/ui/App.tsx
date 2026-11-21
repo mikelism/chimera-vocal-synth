@@ -25,6 +25,13 @@ import { presetOf, PRESETS } from "./body.ts";
 const AnatomyView3D = lazy(() => import("./components/AnatomyView3D.tsx").then((m) => ({ default: m.AnatomyView3D })));
 // the duet page (`?show=<id>`): two 3D heads replaying a pre-rendered song
 const DuetPage = lazy(() => import("./components/DuetPage.tsx").then((m) => ({ default: m.DuetPage })));
+const Choir95 = lazy(() => import("./choir95/Choir95.tsx").then((m) => ({ default: m.Choir95 })));
+
+/** `/choir95` is the Windows 95 choir keyboard. A trailing slash still counts. */
+function isChoir95(): boolean {
+  const path = window.location.pathname.replace(/\/+$/, "") || "/";
+  return path === "/choir95";
+}
 
 /** the show to play, from `?show=<id>` (a plain folder name under public/shows) */
 function showId(): string | null {
@@ -39,6 +46,7 @@ function TopBar() {
   const mode = useStore((s) => s.mode);
   const setMode = useStore((s) => s.setMode);
   const [load, setLoad] = useState(0);
+  const [about, setAbout] = useState(false);
   useEffect(() => {
     const id = setInterval(() => setLoad(engine.load), 500);
     return () => clearInterval(id);
@@ -48,6 +56,9 @@ function TopBar() {
       <div className="brand">
         <span className="wordmark">Chimera</span>
         <span className="tagline">A voice grown from a simulated airway</span>
+        <a className="choir-link" href="/choir95">
+          Choir 95
+        </a>
       </div>
       <Segmented<Mode>
         label="Mode"
@@ -71,6 +82,9 @@ function TopBar() {
             Engine load {Math.round(load * 100)} %
           </span>
         )}
+        <button type="button" className="about-link" onClick={() => setAbout(true)}>
+          About
+        </button>
         <a className="repo-link" href="https://github.com/jamesondh/chimera-vocal-synth" target="_blank" rel="noreferrer" aria-label="Source code on GitHub" title="Source code on GitHub">
           <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true">
             <path
@@ -80,7 +94,36 @@ function TopBar() {
           </svg>
         </a>
       </div>
+      {about && <AboutDialog onClose={() => setAbout(false)} />}
     </header>
+  );
+}
+
+/** Attribution for the choir demo. The same sentence is in Choir 95's Help → About. */
+function AboutDialog({ onClose }: { onClose: () => void }) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+  return (
+    <div className="about-back" data-layout="overlay" onMouseDown={onClose}>
+      <div className="about-box" role="dialog" aria-labelledby="about-title" onMouseDown={(e) => e.stopPropagation()}>
+        <h2 id="about-title">Chimera</h2>
+        <p>A physically modelled voice. Every sound comes from a simulated airway.</p>
+        <p>Choir 95 demo built on Chimera by jamesondh (MIT).</p>
+        <div className="about-actions">
+          <a className="about-go" href="/choir95">
+            Open Choir 95
+          </a>
+          <button type="button" className="primary" onClick={onClose}>
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -180,6 +223,13 @@ function PlayRight() {
 }
 
 export function App() {
+  if (isChoir95()) {
+    return (
+      <Suspense fallback={<div style={{ height: "100vh", background: "#008080" }} />}>
+        <Choir95 />
+      </Suspense>
+    );
+  }
   const show = showId();
   if (show)
     return (
